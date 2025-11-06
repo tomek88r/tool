@@ -1,0 +1,887 @@
+﻿
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ewidencja Sprzętu Pomiarowego</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.3;
+            padding: 8px;
+            font-size: 13px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 1.1rem;
+            margin-bottom: 3px;
+        }
+        
+        .subtitle {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+        
+        .card {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            width: 100%;
+            margin: 2px 0;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+        }
+        
+        .form-group {
+            margin-bottom: 10px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.85rem;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .photo-preview {
+            width: 100%;
+            height: 120px;
+            background: #f8f9fa;
+            border: 1px dashed #dee2e6;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .photo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .photo-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .photo-controls .btn {
+            flex: 1;
+            padding: 6px;
+        }
+        
+        .search-box {
+            margin-bottom: 10px;
+        }
+        
+        .search-box input {
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+        
+        .equipment-item {
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            border-left: 3px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 60px;
+        }
+        
+        .equipment-item.warning {
+            border-left-color: #f39c12;
+            background: #fff3cd;
+        }
+        
+        .equipment-item.danger {
+            border-left-color: #e74c3c;
+            background: #f8d7da;
+        }
+        
+        .item-thumbnail {
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .item-thumbnail img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        
+        .item-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+        
+        .item-number {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .item-days {
+            background: #3498db;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-left: 5px;
+        }
+        
+        .item-days.warning {
+            background: #f39c12;
+        }
+        
+        .item-days.danger {
+            background: #e74c3c;
+        }
+        
+        .item-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3px;
+            font-size: 0.75rem;
+            color: #666;
+        }
+        
+        .item-detail {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        
+        .item-actions .btn {
+            width: auto;
+            padding: 4px 6px;
+            font-size: 0.7rem;
+            margin: 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .status-message {
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            text-align: center;
+            display: none;
+            font-size: 0.85rem;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filters select {
+            flex: 1;
+            min-width: 100px;
+            padding: 6px;
+            font-size: 0.8rem;
+        }
+        
+        @media (max-width: 480px) {
+            .item-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .photo-controls {
+                flex-direction: column;
+            }
+            
+            .equipment-item {
+                padding: 6px;
+                gap: 6px;
+            }
+            
+            .item-thumbnail {
+                width: 45px;
+                height: 45px;
+            }
+        }
+        
+        #camera-input {
+            display: none;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Ewidencja Sprzętu Pomiarowego</h1>
+            <div class="subtitle">Zarządzaj kalibracjami i stanem sprzętu</div>
+        </header>
+        
+        <div id="status-message" class="status-message"></div>
+        
+        <button class="btn btn-success" id="toggle-form">
+            + Dodaj nowy sprzęt
+        </button>
+        
+        <div class="card hidden" id="photo-section">
+            <h3 style="font-size: 1rem; margin-bottom: 8px;">Zdjęcie sprzętu</h3>
+            <div class="photo-preview" id="photo-preview">
+                <div id="photo-placeholder">📷</div>
+                <img id="photo-img" class="hidden">
+            </div>
+            <div class="photo-controls">
+                <button class="btn" id="take-photo">Zrób zdjęcie</button>
+                <button class="btn btn-danger hidden" id="remove-photo">Usuń zdjęcie</button>
+            </div>
+            <input type="file" id="camera-input" accept="image/*" capture="environment">
+        </div>
+        
+        <div class="card hidden" id="form-section">
+            <h3 style="font-size: 1rem; margin-bottom: 8px;">Dane sprzętu</h3>
+            <form id="equipment-form">
+                <div class="form-group">
+                    <label for="inventory-number">Numer ewidencyjny</label>
+                    <input type="text" id="inventory-number" required value="BCH8-OQCREF-">
+                </div>
+                
+                <div class="form-group">
+                    <label for="equipment-name">Nazwa sprzętu</label>
+                    <input type="text" id="equipment-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="manufacturer">Producent</label>
+                    <input type="text" id="manufacturer" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="model">Model</label>
+                    <input type="text" id="model" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="serial-number">Numer seryjny</label>
+                    <input type="text" id="serial-number" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="calibration-date">Data kalibracji</label>
+                    <input type="date" id="calibration-date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="calibration-validity">Ważność kalibracji</label>
+                    <input type="date" id="calibration-validity" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Lokalizacja</label>
+                    <input type="text" id="location" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Uwagi</label>
+                    <textarea id="notes" rows="2"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 6px;">
+                    <button type="button" class="btn btn-success" id="save-equipment">💾 Zapisz</button>
+                    <button type="button" class="btn btn-warning" id="clear-form">🗑️ Wyczyść</button>
+                    <button type="button" class="btn btn-danger" id="cancel-form">❌ Anuluj</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="🔍 Wyszukaj sprzęt...">
+        </div>
+        
+        <div class="filters">
+            <select id="filter-location">
+                <option value="">Wszystkie lokalizacje</option>
+            </select>
+            <select id="filter-status">
+                <option value="">Wszystkie statusy</option>
+                <option value="valid">Ważna</option>
+                <option value="warning">Wygasa</option>
+                <option value="danger">Przeterminowana</option>
+            </select>
+        </div>
+        
+        <div id="equipment-list">
+            <!-- Lista będzie generowana dynamicznie -->
+        </div>
+    </div>
+
+    <script>
+        // Zmienne globalne
+        let equipmentList = [];
+        let currentEditingId = null;
+        let capturedImage = null;
+
+        // Elementy DOM
+        const equipmentListDiv = document.getElementById('equipment-list');
+        const searchInput = document.getElementById('search-input');
+        const takePhotoBtn = document.getElementById('take-photo');
+        const removePhotoBtn = document.getElementById('remove-photo');
+        const photoImg = document.getElementById('photo-img');
+        const photoPlaceholder = document.getElementById('photo-placeholder');
+        const statusMessage = document.getElementById('status-message');
+        const cameraInput = document.getElementById('camera-input');
+        const saveEquipmentBtn = document.getElementById('save-equipment');
+        const clearFormBtn = document.getElementById('clear-form');
+        const cancelFormBtn = document.getElementById('cancel-form');
+        const toggleFormBtn = document.getElementById('toggle-form');
+        const photoSection = document.getElementById('photo-section');
+        const formSection = document.getElementById('form-section');
+        const filterLocation = document.getElementById('filter-location');
+        const filterStatus = document.getElementById('filter-status');
+        
+        // Elementy formularza
+        const inventoryNumberInput = document.getElementById('inventory-number');
+        const equipmentNameInput = document.getElementById('equipment-name');
+        const manufacturerInput = document.getElementById('manufacturer');
+        const modelInput = document.getElementById('model');
+        const serialNumberInput = document.getElementById('serial-number');
+        const calibrationDateInput = document.getElementById('calibration-date');
+        const calibrationValidityInput = document.getElementById('calibration-validity');
+        const notesInput = document.getElementById('notes');
+        const locationInput = document.getElementById('location');
+
+        // Inicjalizacja aplikacji
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEquipmentData();
+            setupEventListeners();
+            updateFilters();
+            hideForm();
+        });
+
+        // Funkcja do kompresji obrazu na miniatury
+        function compressToThumbnail(imageData, maxWidth = 100, maxHeight = 100, quality = 0.5) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Oblicz nowe wymiary zachowując proporcje
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width = Math.round((width * maxHeight) / height);
+                            height = maxHeight;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Konwertuj do base64 z kompresją
+                    const compressedData = canvas.toDataURL('image/jpeg', quality);
+                    resolve(compressedData);
+                };
+                img.src = imageData;
+            });
+        }
+
+        // Ustawienie nasłuchiwaczy zdarzeń
+        function setupEventListeners() {
+            saveEquipmentBtn.addEventListener('click', saveEquipment);
+            clearFormBtn.addEventListener('click', clearForm);
+            cancelFormBtn.addEventListener('click', hideForm);
+            toggleFormBtn.addEventListener('click', showForm);
+            
+            takePhotoBtn.addEventListener('click', takePhoto);
+            removePhotoBtn.addEventListener('click', removePhoto);
+            cameraInput.addEventListener('change', handleCameraPhoto);
+            
+            searchInput.addEventListener('input', renderEquipmentList);
+            filterLocation.addEventListener('change', renderEquipmentList);
+            filterStatus.addEventListener('change', renderEquipmentList);
+            
+            calibrationValidityInput.addEventListener('change', updateDaysToExpiry);
+            
+            inventoryNumberInput.addEventListener('focus', function() {
+                setTimeout(() => {
+                    this.setSelectionRange(this.value.length, this.value.length);
+                }, 0);
+            });
+        }
+
+        // Pokazanie formularza
+        function showForm() {
+            photoSection.classList.remove('hidden');
+            formSection.classList.remove('hidden');
+            toggleFormBtn.classList.add('hidden');
+        }
+
+        // Ukrycie formularza
+        function hideForm() {
+            photoSection.classList.add('hidden');
+            formSection.classList.add('hidden');
+            toggleFormBtn.classList.remove('hidden');
+            clearForm();
+        }
+
+        // Wykonanie zdjęcia
+        function takePhoto() {
+            cameraInput.click();
+        }
+
+        // Obsługa zdjęcia z aparatu - teraz kompresujemy do miniatury
+        async function handleCameraPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    showStatus('Tworzenie miniatury...', 'info');
+                    
+                    // Kompresuj obraz do małej miniatury
+                    const thumbnail = await compressToThumbnail(e.target.result, 100, 100, 0.6);
+                    capturedImage = thumbnail;
+                    
+                    // Pokaż podgląd zdjęcia (też miniaturę)
+                    photoImg.src = capturedImage;
+                    photoImg.classList.remove('hidden');
+                    photoPlaceholder.classList.add('hidden');
+                    removePhotoBtn.classList.remove('hidden');
+                    
+                    showStatus('Miniatura utworzona', 'success');
+                } catch (error) {
+                    console.error('Błąd kompresji:', error);
+                    showStatus('Błąd przetwarzania zdjęcia', 'error');
+                }
+            };
+            reader.onerror = function() {
+                showStatus('Błąd podczas wczytywania zdjęcia', 'error');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Usuwanie zdjęcia
+        function removePhoto() {
+            capturedImage = null;
+            photoImg.classList.add('hidden');
+            photoPlaceholder.classList.remove('hidden');
+            removePhotoBtn.classList.add('hidden');
+            cameraInput.value = '';
+        }
+
+        // Obliczanie dni do końca kalibracji
+        function updateDaysToExpiry() {
+            // Funkcja wywoływana przy zmianie daty
+        }
+
+        // Zapisywanie sprzętu
+        async function saveEquipment() {
+            const requiredFields = [
+                inventoryNumberInput,
+                equipmentNameInput,
+                manufacturerInput,
+                modelInput,
+                serialNumberInput,
+                calibrationDateInput,
+                calibrationValidityInput,
+                locationInput
+            ];
+            
+            let isValid = true;
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.style.borderColor = '#e74c3c';
+                } else {
+                    field.style.borderColor = '#ddd';
+                }
+            });
+            
+            if (!isValid) {
+                showStatus('Proszę wypełnić wszystkie wymagane pola', 'error');
+                return;
+            }
+            
+            const validityDate = new Date(calibrationValidityInput.value);
+            const today = new Date();
+            const timeDiff = validityDate.getTime() - today.getTime();
+            const daysToExpiry = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            
+            // Używamy tylko miniatury - już skompresowanej
+            const equipmentData = {
+                id: currentEditingId || 'eq_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                inventoryNumber: inventoryNumberInput.value.trim(),
+                equipmentName: equipmentNameInput.value.trim(),
+                manufacturer: manufacturerInput.value.trim(),
+                model: modelInput.value.trim(),
+                serialNumber: serialNumberInput.value.trim(),
+                calibrationDate: calibrationDateInput.value,
+                calibrationValidity: calibrationValidityInput.value,
+                daysToExpiry: daysToExpiry,
+                notes: notesInput.value.trim(),
+                location: locationInput.value.trim(),
+                photo: capturedImage // to jest już miniaturka ~2-5KB
+            };
+            
+            console.log('Rozmiar miniatury:', equipmentData.photo ? equipmentData.photo.length : 'brak');
+            
+            const existingIndex = equipmentList.findIndex(item => item.id === equipmentData.id);
+            
+            if (existingIndex !== -1) {
+                equipmentList[existingIndex] = equipmentData;
+                showStatus('Sprzęt zaktualizowany', 'success');
+            } else {
+                equipmentList.push(equipmentData);
+                showStatus('Sprzęt dodany', 'success');
+            }
+            
+            try {
+                const dataToStore = JSON.stringify(equipmentList);
+                console.log('Rozmiar wszystkich danych:', dataToStore.length, 'bajtów');
+                
+                // Sprawdź czy nie przekraczamy limitu
+                if (dataToStore.length > 4000000) {
+                    showStatus('Ostrzeżenie: Baza danych zbliża się do limitu. Rozważ usunięcie starych wpisów.', 'error');
+                }
+                
+                localStorage.setItem('equipmentList', dataToStore);
+            } catch (e) {
+                console.error('Błąd zapisu:', e);
+                showStatus('Błąd zapisu: ' + e.message + '. Spróbuj usunąć niektóre zdjęcia.', 'error');
+                return;
+            }
+            
+            renderEquipmentList();
+            updateFilters();
+            hideForm();
+        }
+
+        // Czyszczenie formularza
+        function clearForm() {
+            document.getElementById('equipment-form').reset();
+            inventoryNumberInput.value = "BCH8-OQCREF-";
+            currentEditingId = null;
+            capturedImage = null;
+            removePhoto();
+        }
+
+        // Aktualizacja filtrów
+        function updateFilters() {
+            const locations = [...new Set(equipmentList.map(item => item.location))].filter(Boolean);
+            
+            filterLocation.innerHTML = '<option value="">Wszystkie lokalizacje</option>';
+            locations.forEach(location => {
+                const option = document.createElement('option');
+                option.value = location;
+                option.textContent = location;
+                filterLocation.appendChild(option);
+            });
+        }
+
+        // Renderowanie listy sprzętu
+        function renderEquipmentList() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const locationFilter = filterLocation.value;
+            const statusFilter = filterStatus.value;
+            
+            let filteredList = equipmentList;
+            
+            if (searchTerm) {
+                filteredList = filteredList.filter(item => 
+                    item.inventoryNumber.toLowerCase().includes(searchTerm) ||
+                    item.equipmentName.toLowerCase().includes(searchTerm) ||
+                    item.manufacturer.toLowerCase().includes(searchTerm) ||
+                    item.model.toLowerCase().includes(searchTerm) ||
+                    item.serialNumber.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (locationFilter) {
+                filteredList = filteredList.filter(item => item.location === locationFilter);
+            }
+            
+            if (statusFilter) {
+                filteredList = filteredList.filter(item => {
+                    if (statusFilter === 'valid') return item.daysToExpiry > 30;
+                    if (statusFilter === 'warning') return item.daysToExpiry <= 30 && item.daysToExpiry > 0;
+                    if (statusFilter === 'danger') return item.daysToExpiry <= 0;
+                    return true;
+                });
+            }
+            
+            equipmentListDiv.innerHTML = '';
+            
+            if (filteredList.length === 0) {
+                equipmentListDiv.innerHTML = '<div class="empty-state">Brak sprzętu spełniającego kryteria</div>';
+                return;
+            }
+            
+            filteredList.forEach(equipment => {
+                const item = document.createElement('div');
+                
+                let statusClass = '';
+                let daysClass = '';
+                if (equipment.daysToExpiry < 7) {
+                    statusClass = 'danger';
+                    daysClass = 'danger';
+                } else if (equipment.daysToExpiry <= 30) {
+                    statusClass = 'warning';
+                    daysClass = 'warning';
+                }
+                
+                item.className = `equipment-item ${statusClass}`;
+                
+                let thumbnailContent = '📷';
+                if (equipment.photo) {
+                    thumbnailContent = `<img src="${equipment.photo}" alt="${equipment.equipmentName}" onclick="showFullImage('${equipment.photo}')">`;
+                }
+                
+                item.innerHTML = `
+                    <div class="item-thumbnail">
+                        ${thumbnailContent}
+                    </div>
+                    <div class="item-content">
+                        <div class="item-header">
+                            <div class="item-number">${equipment.inventoryNumber}</div>
+                            <div class="item-days ${daysClass}">${equipment.daysToExpiry}d</div>
+                        </div>
+                        <div class="item-details">
+                            <div class="item-detail"><strong>${equipment.equipmentName}</strong></div>
+                            <div class="item-detail">${equipment.manufacturer} ${equipment.model}</div>
+                            <div class="item-detail">${equipment.location}</div>
+                            <div class="item-detail">do ${formatDate(equipment.calibrationValidity)}</div>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn" onclick="editEquipment('${equipment.id}')" title="Edytuj">✏️</button>
+                        <button class="btn btn-danger" onclick="deleteEquipment('${equipment.id}')" title="Usuń">🗑️</button>
+                    </div>
+                `;
+                
+                equipmentListDiv.appendChild(item);
+            });
+        }
+
+        // Ładowanie danych
+        function loadEquipmentData() {
+            try {
+                const storedData = localStorage.getItem('equipmentList');
+                if (storedData) {
+                    equipmentList = JSON.parse(storedData);
+                    console.log('Załadowano', equipmentList.length, 'sprzętów');
+                }
+                renderEquipmentList();
+            } catch (error) {
+                equipmentList = [];
+                showStatus('Błąd ładowania danych', 'error');
+            }
+        }
+
+        // Formatowanie daty
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pl-PL');
+        }
+
+        // Edycja sprzętu
+        function editEquipment(id) {
+            const equipment = equipmentList.find(item => item.id === id);
+            if (equipment) {
+                inventoryNumberInput.value = equipment.inventoryNumber;
+                equipmentNameInput.value = equipment.equipmentName;
+                manufacturerInput.value = equipment.manufacturer;
+                modelInput.value = equipment.model;
+                serialNumberInput.value = equipment.serialNumber;
+                calibrationDateInput.value = equipment.calibrationDate;
+                calibrationValidityInput.value = equipment.calibrationValidity;
+                notesInput.value = equipment.notes;
+                locationInput.value = equipment.location;
+                
+                if (equipment.photo) {
+                    capturedImage = equipment.photo;
+                    photoImg.src = equipment.photo;
+                    photoImg.classList.remove('hidden');
+                    photoPlaceholder.classList.add('hidden');
+                    removePhotoBtn.classList.remove('hidden');
+                } else {
+                    removePhoto();
+                }
+                
+                currentEditingId = equipment.id;
+                showForm();
+            }
+        }
+
+        // Usuwanie sprzętu
+        function deleteEquipment(id) {
+            if (confirm('Czy na pewno chcesz usunąć ten sprzęt?')) {
+                equipmentList = equipmentList.filter(item => item.id !== id);
+                localStorage.setItem('equipmentList', JSON.stringify(equipmentList));
+                renderEquipmentList();
+                updateFilters();
+                showStatus('Sprzęt usunięty', 'success');
+            }
+        }
+
+        // Pokazanie pełnego obrazu
+        function showFullImage(imageSrc) {
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(0,0,0,0.9)';
+            overlay.style.display = 'flex';
+            overlay.style.justifyContent = 'center';
+            overlay.style.alignItems = 'center';
+            overlay.style.zIndex = '1000';
+            overlay.onclick = function() {
+                document.body.removeChild(overlay);
+            };
+            
+            const img = document.createElement('img');
+            img.src = imageSrc;
+            img.style.maxWidth = '95%';
+            img.style.maxHeight = '95%';
+            img.style.borderRadius = '8px';
+            
+            overlay.appendChild(img);
+            document.body.appendChild(overlay);
+        }
+
+        // Wyświetlanie komunikatów statusu
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Udostępnienie funkcji globalnie
+        window.editEquipment = editEquipment;
+        window.deleteEquipment = deleteEquipment;
+        window.showFullImage = showFullImage;
+    </script>
+</body>
+</html>
